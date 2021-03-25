@@ -1,6 +1,13 @@
 #ifndef NOTAMONGUS_SRC_MAZE_H_
 #define NOTAMONGUS_SRC_MAZE_H_
 
+#include "Shaders.h"
+
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <vector>
 #include <utility>
 #include <random>
@@ -31,11 +38,18 @@ private:
     std::mt19937 rng;
 
     std::vector<float> vertices;
-    std::vector<int> indices;
+    std::vector<unsigned int> indices;
+    unsigned int VAO;
+    Shader *shaders;
+
+    char *vertexShader = "resources/shaders/mazeVertex.glsl";
+    char *fragmentShader = "resources/shaders/mazeFragment.glsl";
 
     int getRandom(int low, int high);
     void createMaze();
     void createIndices();
+    unsigned int createVAO();
+    Shader *createShaders();
 public:
     int gridBreadth, gridLength;
     std::pair<int, int> startPoint, endPoint;
@@ -43,6 +57,7 @@ public:
     Maze(int breadth, int length);
 
     void debug();
+    void draw();
 };
 
 #endif //NOTAMONGUS_SRC_MAZE_H_

@@ -11,6 +11,7 @@ Maze::Maze(int breadth, int length) {
             ++colIdx;
         }
         ++rowIdx;
+        colIdx = 0;
     }
 
     /* Init RNG */
@@ -23,6 +24,8 @@ Maze::Maze(int breadth, int length) {
         {getRandom(0, gridBreadth - 1), getRandom(0, gridLength - 1)};
     createMaze();
     createIndices();
+    VAO = createVAO();
+    shaders = createShaders();
 }
 
 int Maze::getRandom(int low, int high) {
@@ -62,12 +65,17 @@ void Maze::createMaze() {
 
     while (!wallQueue.empty()) {
         /* Get a random wall */
-        int chooseIdx = getRandom(0, wallQueue.size());
-        auto chooseWall = wallQueue[wallQueue.size() - 1];
+        int chooseIdx = getRandom(0, wallQueue.size() - 1);
+        auto chooseWall = wallQueue[chooseIdx];
 
         /* Move to end before removing to get O(1) delete */
         std::swap(wallQueue[chooseIdx], wallQueue[wallQueue.size() - 1]);
         wallQueue.pop_back();
+
+        if (chooseWall->cell[0]->taken and chooseWall->cell[1]->taken) {
+            delete chooseWall;
+            continue;
+        }
 
         /* Break partition joining the chosen cells */
         for (int wallIdx = 0; wallIdx < 2; wallIdx++) {
@@ -105,12 +113,13 @@ void Maze::createMaze() {
             /* Set endpoint as last visited point */
             endPoint = chooseWall->points[wallIdx];
         }
-
         delete chooseWall;
     }
 }
 
 void Maze::debug() {
+    std::string debugLine(gridLength, '-');
+    std::cout << debugLine << "\n";
     for (auto row: grid) {
         for (auto col: row) {
             for (int i = 0; i < 4; i++) {
@@ -120,6 +129,7 @@ void Maze::debug() {
         }
         std::cout << "\n";
     }
+    std::cout << debugLine << "\n";
 }
 
 void Maze::createIndices() {
@@ -135,10 +145,10 @@ void Maze::createIndices() {
     std::vector<Direction>
         directions =
         {
-            Direction(0, 0, 0, 1),
+            Direction(1, 0, 0, 0),
             Direction(0, 1, 1, 1),
+            Direction(0, 0, 0, 1),
             Direction(1, 1, 1, 0),
-            Direction(1, 0, 0, 0)
         };
 
     /* Get all unique vertices */
@@ -161,8 +171,8 @@ void Maze::createIndices() {
     /* Assign index to each unique vertex and store it in vertex buffer */
     int currIdx = 0;
     for (auto &it: hashVertex) {
-        vertices.push_back(it.first.first);
-        vertices.push_back(it.first.second);
+        vertices.push_back((float) it.first.first / (float) gridBreadth);
+        vertices.push_back((float) it.first.second / (float) gridLength);
         it.second = currIdx++;
     }
 
@@ -185,3 +195,49 @@ void Maze::createIndices() {
     }
 }
 
+unsigned int Maze::createVAO() {
+    /* Create VAO */
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    /* Set vertex buffer */
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 vertices.size() * sizeof(float),
+                 vertices.data(),
+                 GL_STATIC_DRAW);
+
+    /* Set element buffer */
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indices.size() * sizeof(unsigned int),
+                 indices.data(),
+                 GL_STATIC_DRAW);
+
+    /* Set vertex pointers */
+    glVertexAttribPointer(0,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          2 * sizeof(float),
+                          (void *) 0);
+    glEnableVertexAttribArray(0);
+
+    return VAO;
+}
+
+Shader *Maze::createShaders() {
+    auto newShader = new Shader(vertexShader, fragmentShader);
+    return newShader;
+}
+
+void Maze::draw() {
+    shaders->use();
+    glBindVertexArray(VAO);
+    glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+}

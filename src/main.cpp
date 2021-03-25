@@ -14,22 +14,27 @@ void exitWindow() {
     glfwTerminate();
 }
 
-void updateWindow(WindowHandler windowHandler) {
+void updateWindow(WindowHandler *windowHandler, Maze *maze) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    /* Draw the maze */
+    maze->draw();
+
     /* Check and call events and swap buffers */
-    glfwSwapBuffers(windowHandler.window);
+    glfwSwapBuffers(windowHandler->window);
     glfwPollEvents();
 }
 
 int main() {
-    auto windowHandler = WindowHandler(WIDTH, HEIGHT, WINDOW_TITLE);
+    auto windowHandler = new WindowHandler(WIDTH, HEIGHT, WINDOW_TITLE);
+
+    auto maze = new Maze(50, 50);
 
     /* While window is not closed */
-    while (!glfwWindowShouldClose(windowHandler.window)) {
-        updateWindow(windowHandler);
+    while (!glfwWindowShouldClose(windowHandler->window)) {
+        updateWindow(windowHandler, maze);
     }
     exitWindow();
 }
