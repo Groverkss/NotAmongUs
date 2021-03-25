@@ -1,7 +1,10 @@
+#include "WindowHandler.h"
+#include "Maze.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "WindowHandler.h"
+#include <iostream>
 
 char *WINDOW_TITLE = "Not Among Us";
 int WIDTH = 600;

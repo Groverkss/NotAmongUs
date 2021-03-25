@@ -7,8 +7,7 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-file(GLOB SOURCE_FILES ${SRC_DIR}/*.cpp)
-add_executable(NotAmongUs ${SOURCE_FILES})
+add_executable(NotAmongUs src/main.cpp src/WindowHandler.cpp src/Maze.cpp)
 
 # Shader loader class
 target_include_directories(${PROJECT_NAME} PRIVATE "${INCLUDE_DIR}")
