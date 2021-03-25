@@ -3,10 +3,14 @@
 Maze::Maze(int breadth, int length) {
     gridBreadth = breadth, gridLength = length;
     grid.resize(gridBreadth, std::vector<Cell *>(gridLength));
+
+    int rowIdx = 0, colIdx = 0;
     for (auto &row: grid) {
         for (auto &col: row) {
-            col = new Cell;
+            col = new Cell(rowIdx, colIdx);
+            ++colIdx;
         }
+        ++rowIdx;
     }
 
     /* Init RNG */
@@ -18,6 +22,7 @@ Maze::Maze(int breadth, int length) {
     startPoint =
         {getRandom(0, gridBreadth - 1), getRandom(0, gridLength - 1)};
     createMaze();
+    createIndices();
 }
 
 int Maze::getRandom(int low, int high) {
@@ -100,17 +105,83 @@ void Maze::createMaze() {
             /* Set endpoint as last visited point */
             endPoint = chooseWall->points[wallIdx];
         }
+
+        delete chooseWall;
     }
 }
 
 void Maze::debug() {
-    for (auto it1: grid) {
-        for (auto it2: it1) {
+    for (auto row: grid) {
+        for (auto col: row) {
             for (int i = 0; i < 4; i++) {
-                std::cout << it2->wall[i];
+                std::cout << col->wall[i];
             }
             std::cout << " ";
         }
         std::cout << "\n";
     }
 }
+
+void Maze::createIndices() {
+    struct Direction {
+        int x1, y1;
+        int x2, y2;
+
+        Direction(int x1, int y1, int x2, int y2) {
+            this->x1 = x1, this->y1 = y1, this->x2 = x2, this->y2 = y2;
+        }
+    };
+
+    std::vector<Direction>
+        directions =
+        {
+            Direction(0, 0, 0, 1),
+            Direction(0, 1, 1, 1),
+            Direction(1, 1, 1, 0),
+            Direction(1, 0, 0, 0)
+        };
+
+    /* Get all unique vertices */
+    std::map<std::pair<int, int>, int> hashVertex;
+    for (auto row: grid) {
+        for (auto col: row) {
+            std::pair<int, int> curr = {col->row, col->col};
+            for (int i = 0; i < directions.size(); i++) {
+                if (!col->wall[i]) {
+                    continue;
+                }
+
+                auto it = directions[i];
+                hashVertex[{curr.first + it.x1, curr.second + it.y1}];
+                hashVertex[{curr.first + it.x2, curr.second + it.y2}];
+            }
+        }
+    }
+
+    /* Assign index to each unique vertex and store it in vertex buffer */
+    int currIdx = 0;
+    for (auto &it: hashVertex) {
+        vertices.push_back(it.first.first);
+        vertices.push_back(it.first.second);
+        it.second = currIdx++;
+    }
+
+    /* Store line indices */
+    for (auto row: grid) {
+        for (auto col: row) {
+            std::pair<int, int> curr = {col->row, col->col};
+            for (int i = 0; i < directions.size(); i++) {
+                if (!col->wall[i]) {
+                    continue;
+                }
+
+                auto it = directions[i];
+                indices.push_back(hashVertex[{curr.first + it.x1,
+                                              curr.second + it.y1}]);
+                indices.push_back(hashVertex[{curr.first + it.x2,
+                                              curr.second + it.y2}]);
+            }
+        }
+    }
+}
+
