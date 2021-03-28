@@ -170,9 +170,19 @@ void Maze::createIndices() {
 
     /* Assign index to each unique vertex and store it in vertex buffer */
     int currIdx = 0;
+
+    /* Everything here should be in the model matrix */
     for (auto &it: hashVertex) {
-        vertices.push_back((float) it.first.first / (float) gridBreadth);
-        vertices.push_back((float) it.first.second / (float) gridLength);
+        auto vertex1 = (float) it.first.first / (float) gridBreadth;
+        auto vertex2 = (float) it.first.second / (float) gridLength;
+
+        /* Scale by 1.5 and send 0.75, 0 to -1, 1*/
+        vertex1 *= 1.5, vertex2 *= 1.5;
+        vertex1 -= 0.75, vertex2 -= 0.75;
+
+        vertices.push_back(vertex1);
+        vertices.push_back(vertex2);
+
         it.second = currIdx++;
     }
 
@@ -197,9 +207,9 @@ void Maze::createIndices() {
 
 unsigned int Maze::createVAO() {
     /* Create VAO */
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    unsigned int newVAO;
+    glGenVertexArrays(1, &newVAO);
+    glBindVertexArray(newVAO);
 
     /* Set vertex buffer */
     unsigned int VBO;
@@ -228,7 +238,7 @@ unsigned int Maze::createVAO() {
                           (void *) 0);
     glEnableVertexAttribArray(0);
 
-    return VAO;
+    return newVAO;
 }
 
 Shader *Maze::createShaders() {
@@ -240,4 +250,9 @@ void Maze::draw() {
     shaders->use();
     glBindVertexArray(VAO);
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+bool Maze::checkCollision(Model *otherModel) {
+    /* TODO: Implement collision detection in direction */
+    return false;
 }

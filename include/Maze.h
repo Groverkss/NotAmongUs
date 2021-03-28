@@ -1,6 +1,7 @@
 #ifndef NOTAMONGUS_SRC_MAZE_H_
 #define NOTAMONGUS_SRC_MAZE_H_
 
+#include "Model.h"
 #include "Shaders.h"
 
 #include <glad/glad.h>
@@ -58,6 +59,8 @@ public:
 
     void debug();
     void draw();
+
+    bool checkCollision(Model *otherModel);
 };
 
 #endif //NOTAMONGUS_SRC_MAZE_H_
