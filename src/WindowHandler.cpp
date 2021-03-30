@@ -3,7 +3,9 @@
 void WindowHandler::framebufferSizeCallback(GLFWwindow *window,
                                             int width,
                                             int height) {
-    glViewport(0, 0, width, height);
+    /* Keep window size square */
+    int minimumVar = std::min(width, height);
+    glViewport(0, 0, minimumVar, minimumVar);
 }
 
 WindowHandler::WindowHandler(int width, int height, char *title) {

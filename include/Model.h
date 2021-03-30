@@ -17,7 +17,7 @@ private:
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
 
-    glm::mat4 modelTransform, viewTransform;
+    glm::mat4 modelTransform, viewTransform, projectionTransform;
 
     unsigned int VAO;
     Shader *shaders;
@@ -25,17 +25,19 @@ private:
     char *vertexShader = "resources/shaders/modelVertex.glsl";
     char *fragmentShader = "resources/shaders/modelFragment.glsl";
 
+    std::pair<float, float> currPoint;
+
     void createIndices();
     unsigned int createVAO();
     Shader *createShaders();
-    void initTransforms();
 public:
     /* Points in clockwise direction starting from top left */
     std::vector<std::pair<float, float>> points;
     std::vector<float> color;
 
-    Model(const std::vector<std::pair<float, float>> &points,
-          const std::vector<float> &color);
+    Model(std::pair<float, float> startPoint,
+          const std::vector<float> &color
+    );
 
     void debug();
     void draw();

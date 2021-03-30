@@ -19,13 +19,16 @@ Maze::Maze(int breadth, int length) {
     std::mt19937 rngInit(dev());
     rng = rngInit;
 
-    /* Init Maze */
-    startPoint =
-        {getRandom(0, gridBreadth - 1), getRandom(0, gridLength - 1)};
+    startPoint = {
+        getRandom(0, gridBreadth - 1),
+        getRandom(0, gridLength - 1)
+    };
+
     createMaze();
     createIndices();
     VAO = createVAO();
     shaders = createShaders();
+
 }
 
 int Maze::getRandom(int low, int high) {
@@ -118,18 +121,10 @@ void Maze::createMaze() {
 }
 
 void Maze::debug() {
-    std::string debugLine(gridLength, '-');
-    std::cout << debugLine << "\n";
-    for (auto row: grid) {
-        for (auto col: row) {
-            for (int i = 0; i < 4; i++) {
-                std::cout << col->wall[i];
-            }
-            std::cout << " ";
-        }
-        std::cout << "\n";
+    for (auto it: vertices) {
+        std::cout << it << " ";
     }
-    std::cout << debugLine << "\n";
+    std::cout << "\n";
 }
 
 void Maze::createIndices() {
@@ -173,12 +168,8 @@ void Maze::createIndices() {
 
     /* Everything here should be in the model matrix */
     for (auto &it: hashVertex) {
-        auto vertex1 = (float) it.first.first / (float) gridBreadth;
-        auto vertex2 = (float) it.first.second / (float) gridLength;
-
-        /* Scale by 1.5 and send 0.75, 0 to -1, 1*/
-        vertex1 *= 1.5, vertex2 *= 1.5;
-        vertex1 -= 0.75, vertex2 -= 0.75;
+        auto vertex1 = (float) it.first.first;
+        auto vertex2 = (float) it.first.second;
 
         vertices.push_back(vertex1);
         vertices.push_back(vertex2);
@@ -247,9 +238,20 @@ Shader *Maze::createShaders() {
 }
 
 void Maze::draw() {
+    /* TODO: Fix matrix transformations to proper transformations */
+    auto viewTransform = glm::lookAt(
+        glm::vec3(15, 15, 1),
+        glm::vec3(15, 15, 0),
+        glm::vec3(0, 1, 0)
+    );
+    auto projectionTransform = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f);
+
     shaders->use();
+    shaders->setMat4("view", viewTransform);
+    shaders->setMat4("projection", projectionTransform);
     glBindVertexArray(VAO);
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 bool Maze::checkCollision(Model *otherModel) {

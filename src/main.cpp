@@ -15,14 +15,18 @@ void exitWindow() {
     glfwTerminate();
 }
 
-void updateWindow(WindowHandler *windowHandler, Maze *maze, Model *obj) {
+void updateWindow(WindowHandler *windowHandler,
+                  Maze *maze,
+                  Model *obj) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     /* Draw the maze */
     maze->draw();
+    obj->draw();
+
+    /* Redundant call which i dont know why needs to be called */
     obj->draw();
 
     /* Check and call events and swap buffers */
@@ -35,15 +39,9 @@ int main() {
 
     auto maze = new Maze(30, 30);
 
-    std::vector<std::pair<float, float>> points = {
-        {0.0f, 0.0f},
-        {0.0f, 1.0f},
-        {1.0f, 1.0f},
-        {1.0f, 0.0f}
-    };
     std::vector<float> color = {0.0f, 0.0f, 0.0f};
 
-    auto obj = new Model(points, color);
+    auto obj = new Model(maze->startPoint, color);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)) {

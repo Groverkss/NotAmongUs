@@ -1,14 +1,31 @@
 #include "Model.h"
 
-Model::Model(const std::vector<std::pair<float, float>> &points,
+Model::Model(std::pair<float, float> startPoint,
              const std::vector<float> &color) {
-    this->points = points;
+    this->currPoint = startPoint;
     this->color = color;
+
+    points = {
+        {startPoint.first, startPoint.second},
+        {startPoint.first, startPoint.second + 1},
+        {startPoint.first + 1, startPoint.second + 1},
+        {startPoint.first + 1, startPoint.second},
+    };
 
     createIndices();
     VAO = createVAO();
     shaders = createShaders();
-    initTransforms();
+
+    /* TODO: Fix temporary value */
+    modelTransform = glm::mat4(1.0f);
+    viewTransform = glm::lookAt(
+        glm::vec3(15, 15, 1),
+        glm::vec3(15, 15, 0),
+        glm::vec3(0, 1, 0)
+    );
+
+    /* TODO: Remove constants */
+    projectionTransform = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f);
 }
 
 void Model::createIndices() {
@@ -62,37 +79,43 @@ Shader *Model::createShaders() {
     return newShader;
 }
 
-void Model::initTransforms() {
-    /* TODO: Write better transforms */
-    modelTransform = glm::mat4(1.0f);
-    modelTransform =
-        glm::scale(modelTransform, glm::vec3(0.1f, 0.1f, 1.0f));
-    modelTransform =
-        glm::translate(modelTransform, glm::vec3(-0.5f, -0.5f, 0.0f));
-
-    viewTransform = glm::mat4(1.0f);
-}
-
 void Model::debug() {
+    std::cout << "MODEL MATRIX\n\n";
+
     auto model = glm::value_ptr(modelTransform);
     for (int i = 0; i < 16; i++) {
         std::cout << model[i] << "\n";
     }
 
-    std::cout << "\n\n";
+    std::cout << "VIEW MATRIX\n\n";
 
     auto view = glm::value_ptr(viewTransform);
     for (int i = 0; i < 16; i++) {
         std::cout << view[i] << "\n";
     }
+
+    std::cout << "PROJECTION MATRIX\n\n";
+
+    auto project = glm::value_ptr(projectionTransform);
+    for (int i = 0; i < 16; i++) {
+        std::cout << project[i] << "\n";
+    }
+
+    std::cout << "VERTICES \n\n";
+
+    for (auto it: vertices) {
+        std::cout << it << "\n";
+    }
 }
 
 void Model::draw() {
+    shaders->setMat4("projection", projectionTransform);
     shaders->setMat4("model", modelTransform);
     shaders->setMat4("view", viewTransform);
     shaders->use();
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 bool Model::checkCollision(Model *otherModel) {
