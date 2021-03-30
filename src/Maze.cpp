@@ -237,17 +237,12 @@ Shader *Maze::createShaders() {
     return newShader;
 }
 
-void Maze::draw() {
-    auto viewTransform = glm::lookAt(
-        glm::vec3(gridBreadth / 2, gridLength / 2, 1),
-        glm::vec3(gridBreadth / 2, gridLength / 2, 0),
-        glm::vec3(0, 1, 0)
-    );
-    auto projectionTransform = glm::ortho((float) -gridLength,
-                                          (float) gridLength,
-                                          (float) -gridBreadth,
-                                          (float) gridBreadth);
+void Maze::setCameraAndProjection(glm::mat4 camera, glm::mat4 projection) {
+    viewTransform = camera;
+    projectionTransform = projection;
+}
 
+void Maze::draw() {
     shaders->use();
     shaders->setMat4("view", viewTransform);
     shaders->setMat4("projection", projectionTransform);

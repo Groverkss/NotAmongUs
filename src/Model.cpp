@@ -6,12 +6,13 @@ Model::Model(const std::pair<float, float> &startPoint,
     this->currPoint = startPoint;
     this->color = color;
     this->maze = mazeIn;
+    objectWidth = 0.2f;
 
     points = {
         {startPoint.first, startPoint.second},
-        {startPoint.first, startPoint.second + 0.2f},
-        {startPoint.first + 0.2f, startPoint.second + 0.2f},
-        {startPoint.first + 0.3f, startPoint.second},
+        {startPoint.first, startPoint.second + objectWidth},
+        {startPoint.first + objectWidth, startPoint.second + objectWidth},
+        {startPoint.first + objectWidth, startPoint.second},
     };
 
     createIndices();
@@ -19,19 +20,8 @@ Model::Model(const std::pair<float, float> &startPoint,
     shaders = createShaders();
 
     modelTransform = glm::mat4(1.0f);
-
-    /* TODO: Make view matrix global */
-    viewTransform = glm::lookAt(
-        glm::vec3(maze->gridBreadth / 2, maze->gridLength / 2, 1),
-        glm::vec3(maze->gridBreadth / 2, maze->gridLength / 2, 0),
-        glm::vec3(0, 1, 0)
-    );
-
-    /* TODO: Make ortho matrix global */
-    projectionTransform = glm::ortho((float) -maze->gridLength,
-                                     (float) maze->gridLength,
-                                     (float) -maze->gridBreadth,
-                                     (float) maze->gridBreadth);
+    viewTransform = glm::mat4(1.0f);
+    projectionTransform = glm::mat4(1.0f);
 }
 
 void Model::createIndices() {
@@ -115,18 +105,54 @@ void Model::debug() {
 }
 
 void Model::draw() {
+    shaders->use();
     shaders->setMat4("model", modelTransform);
     shaders->setMat4("view", viewTransform);
     shaders->setMat4("projection", projectionTransform);
 
     shaders->setVec3("color", glm::make_vec3(color.data()));
-    shaders->use();
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
+void Model::setCameraAndProjection(glm::mat4 camera, glm::mat4 projection) {
+    viewTransform = camera;
+    projectionTransform = projection;
+}
+
 bool Model::checkCollisionWithMaze() {
-    /* TODO: Implement collision with maze */
+    auto x = currPoint.first;
+    auto y = currPoint.second;
+    auto w = objectWidth;
+
+    for (int i = 0; i < maze->indices.size(); i += 2) {
+        auto index1 = maze->indices[i];
+        auto index2 = maze->indices[i + 1];
+
+        std::pair<float, float>
+            vertex1 = {maze->vertices[index1 << 1],
+                       maze->vertices[(index1 << 1) | 1]};
+        std::pair<float, float>
+            vertex2 = {maze->vertices[index2 << 1],
+                       maze->vertices[(index2 << 1) | 1]};
+
+        if (vertex1.first == vertex2.first) {
+            if (x + w >= vertex1.first
+                and vertex1.first >= x
+                and std::max(vertex1.second, vertex2.second) >= y
+                and std::min(vertex1.second, vertex2.second) <= y + w) {
+                return true;
+            }
+        } else {
+            if (y + w >= vertex1.second
+                and vertex1.second >= y
+                and std::max(vertex1.first, vertex2.first) >= x
+                and std::min(vertex1.first, vertex2.first) <= x + w) {
+                return true;
+            }
+        }
+    }
+
     return false;
 }

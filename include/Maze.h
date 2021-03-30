@@ -37,8 +37,6 @@ private:
     std::vector<std::vector<Cell *>> grid;
     std::mt19937 rng;
 
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
     unsigned int VAO;
     Shader *shaders;
 
@@ -50,7 +48,12 @@ private:
     void createIndices();
     unsigned int createVAO();
     Shader *createShaders();
+protected:
+    glm::mat4 viewTransform, projectionTransform;
 public:
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
     int gridBreadth, gridLength;
     std::pair<int, int> startPoint, endPoint;
 
@@ -58,6 +61,8 @@ public:
 
     void debug();
     void draw();
+
+    void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
 };
 
 #endif //NOTAMONGUS_SRC_MAZE_H_

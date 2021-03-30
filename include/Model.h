@@ -24,18 +24,18 @@ private:
     char *vertexShader = "resources/shaders/modelVertex.glsl";
     char *fragmentShader = "resources/shaders/modelFragment.glsl";
 
-    std::pair<float, float> currPoint;
-    Maze *maze;
-
     void createIndices();
     unsigned int createVAO();
     Shader *createShaders();
 protected:
     glm::mat4 modelTransform, viewTransform, projectionTransform;
+    float objectWidth;
+    Maze *maze;
 public:
     /* Points in clockwise direction starting from top left */
     std::vector<std::pair<float, float>> points;
     std::vector<float> color;
+    std::pair<float, float> currPoint;
 
     Model(const std::pair<float, float> &startPoint,
           const std::vector<float> &color,
@@ -44,6 +44,8 @@ public:
 
     void debug();
     void draw();
+
+    void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
 
     bool checkCollisionWithMaze();
 };

@@ -6,7 +6,7 @@ Player::Player(const std::pair<float, float> &startPoint,
     this->window = window;
     horizontalSpeed = 0;
     verticalSpeed = 0;
-    moveSpeed = 0.2f;
+    moveSpeed = 0.04f;
 }
 
 /* Move player model */
@@ -29,9 +29,14 @@ void Player::processInput() {
 void Player::move() {
     processInput();
 
-    auto moveTransform = glm::translate(glm::mat4(1.0f),
-                                        glm::vec3(horizontalSpeed,
-                                                  verticalSpeed,
-                                                  0.0f));
-    modelTransform = moveTransform * modelTransform;
+    currPoint.first += verticalSpeed, currPoint.second += horizontalSpeed;
+    if (!checkCollisionWithMaze()) {
+        auto moveTransform = glm::translate(glm::mat4(1.0f),
+                                            glm::vec3(horizontalSpeed,
+                                                      verticalSpeed,
+                                                      0.0f));
+        modelTransform = moveTransform * modelTransform;
+    } else {
+        currPoint.first -= verticalSpeed, currPoint.second -= horizontalSpeed;
+    }
 }
