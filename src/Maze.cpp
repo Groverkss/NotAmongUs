@@ -238,13 +238,15 @@ Shader *Maze::createShaders() {
 }
 
 void Maze::draw() {
-    /* TODO: Fix matrix transformations to proper transformations */
     auto viewTransform = glm::lookAt(
-        glm::vec3(15, 15, 1),
-        glm::vec3(15, 15, 0),
+        glm::vec3(gridBreadth / 2, gridLength / 2, 1),
+        glm::vec3(gridBreadth / 2, gridLength / 2, 0),
         glm::vec3(0, 1, 0)
     );
-    auto projectionTransform = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f);
+    auto projectionTransform = glm::ortho((float) -gridLength,
+                                          (float) gridLength,
+                                          (float) -gridBreadth,
+                                          (float) gridBreadth);
 
     shaders->use();
     shaders->setMat4("view", viewTransform);
@@ -252,9 +254,4 @@ void Maze::draw() {
     glBindVertexArray(VAO);
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-}
-
-bool Maze::checkCollision(Model *otherModel) {
-    /* TODO: Implement collision detection in direction */
-    return false;
 }

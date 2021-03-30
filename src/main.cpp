@@ -1,6 +1,8 @@
 #include "WindowHandler.h"
-#include "Maze.h"
+#include "Player.h"
 #include "Model.h"
+#include "Maze.h"
+#include "Color.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,17 +19,22 @@ void exitWindow() {
 
 void updateWindow(WindowHandler *windowHandler,
                   Maze *maze,
-                  Model *obj) {
+                  Player *player,
+                  Model *imposter) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    /* Move objects */
+    player->move();
+
     /* Draw the maze */
     maze->draw();
-    obj->draw();
+    player->draw();
+    imposter->draw();
 
     /* Redundant call which i dont know why needs to be called */
-    obj->draw();
+    player->draw();
 
     /* Check and call events and swap buffers */
     glfwSwapBuffers(windowHandler->window);
@@ -39,13 +46,12 @@ int main() {
 
     auto maze = new Maze(30, 30);
 
-    std::vector<float> color = {0.0f, 0.0f, 0.0f};
-
-    auto obj = new Model(maze->startPoint, color);
+    auto player = new Player(maze->startPoint, maze, windowHandler->window);
+    auto imposter = new Model(maze->endPoint, Color::RED, maze);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)) {
-        updateWindow(windowHandler, maze, obj);
+        updateWindow(windowHandler, maze, player, imposter);
     }
     exitWindow();
 }

@@ -1,31 +1,37 @@
 #include "Model.h"
 
-Model::Model(std::pair<float, float> startPoint,
-             const std::vector<float> &color) {
+Model::Model(const std::pair<float, float> &startPoint,
+             const std::vector<float> &color,
+             Maze *mazeIn) {
     this->currPoint = startPoint;
     this->color = color;
+    this->maze = mazeIn;
 
     points = {
         {startPoint.first, startPoint.second},
-        {startPoint.first, startPoint.second + 1},
-        {startPoint.first + 1, startPoint.second + 1},
-        {startPoint.first + 1, startPoint.second},
+        {startPoint.first, startPoint.second + 0.2f},
+        {startPoint.first + 0.2f, startPoint.second + 0.2f},
+        {startPoint.first + 0.3f, startPoint.second},
     };
 
     createIndices();
     VAO = createVAO();
     shaders = createShaders();
 
-    /* TODO: Fix temporary value */
     modelTransform = glm::mat4(1.0f);
+
+    /* TODO: Make view matrix global */
     viewTransform = glm::lookAt(
-        glm::vec3(15, 15, 1),
-        glm::vec3(15, 15, 0),
+        glm::vec3(maze->gridBreadth / 2, maze->gridLength / 2, 1),
+        glm::vec3(maze->gridBreadth / 2, maze->gridLength / 2, 0),
         glm::vec3(0, 1, 0)
     );
 
-    /* TODO: Remove constants */
-    projectionTransform = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f);
+    /* TODO: Make ortho matrix global */
+    projectionTransform = glm::ortho((float) -maze->gridLength,
+                                     (float) maze->gridLength,
+                                     (float) -maze->gridBreadth,
+                                     (float) maze->gridBreadth);
 }
 
 void Model::createIndices() {
@@ -68,7 +74,7 @@ unsigned int Model::createVAO() {
                           GL_FLOAT,
                           GL_FALSE,
                           2 * sizeof(float),
-                          (void *) 0);
+                          nullptr);
     glEnableVertexAttribArray(0);
 
     return newVAO;
@@ -109,16 +115,18 @@ void Model::debug() {
 }
 
 void Model::draw() {
-    shaders->setMat4("projection", projectionTransform);
     shaders->setMat4("model", modelTransform);
     shaders->setMat4("view", viewTransform);
+    shaders->setMat4("projection", projectionTransform);
+
+    shaders->setVec3("color", glm::make_vec3(color.data()));
     shaders->use();
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }
 
-bool Model::checkCollision(Model *otherModel) {
-    /* TODO: Implement collision */
+bool Model::checkCollisionWithMaze() {
+    /* TODO: Implement collision with maze */
     return false;
 }
