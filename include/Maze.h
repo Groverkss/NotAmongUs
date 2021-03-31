@@ -43,7 +43,6 @@ private:
     char *vertexShader = "resources/shaders/mazeVertex.glsl";
     char *fragmentShader = "resources/shaders/mazeFragment.glsl";
 
-    int getRandom(int low, int high);
     void createMaze();
     void createIndices();
     unsigned int createVAO();
@@ -63,6 +62,7 @@ public:
     void draw();
 
     void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
+    int getRandom(int low, int high);
 };
 
 #endif //NOTAMONGUS_SRC_MAZE_H_

@@ -2,17 +2,23 @@
 
 Model::Model(const std::pair<float, float> &startPoint,
              const std::vector<float> &color,
-             Maze *mazeIn) {
+             Maze *mazeIn,
+             float objectWidth) {
     this->currPoint = startPoint;
     this->color = color;
     this->maze = mazeIn;
-    objectWidth = 0.2f;
+    this->objectWidth = objectWidth;
+
+    auto margin = (1.0f - objectWidth) / 2;
+
+    this->currPoint.first += margin;
+    this->currPoint.second += margin;
 
     points = {
-        {startPoint.first, startPoint.second},
-        {startPoint.first, startPoint.second + objectWidth},
-        {startPoint.first + objectWidth, startPoint.second + objectWidth},
-        {startPoint.first + objectWidth, startPoint.second},
+        {currPoint.first, currPoint.second},
+        {currPoint.first, currPoint.second + objectWidth},
+        {currPoint.first + objectWidth, currPoint.second + objectWidth},
+        {currPoint.first + objectWidth, currPoint.second},
     };
 
     createIndices();
@@ -22,6 +28,13 @@ Model::Model(const std::pair<float, float> &startPoint,
     modelTransform = glm::mat4(1.0f);
     viewTransform = glm::mat4(1.0f);
     projectionTransform = glm::mat4(1.0f);
+
+    show = true;
+
+    /* Init RNG */
+    std::random_device dev;
+    std::mt19937 rngInit(dev());
+    rng = rngInit;
 }
 
 void Model::createIndices() {
@@ -75,36 +88,11 @@ Shader *Model::createShaders() {
     return newShader;
 }
 
-void Model::debug() {
-    std::cout << "MODEL MATRIX\n\n";
-
-    auto model = glm::value_ptr(modelTransform);
-    for (int i = 0; i < 16; i++) {
-        std::cout << model[i] << "\n";
-    }
-
-    std::cout << "VIEW MATRIX\n\n";
-
-    auto view = glm::value_ptr(viewTransform);
-    for (int i = 0; i < 16; i++) {
-        std::cout << view[i] << "\n";
-    }
-
-    std::cout << "PROJECTION MATRIX\n\n";
-
-    auto project = glm::value_ptr(projectionTransform);
-    for (int i = 0; i < 16; i++) {
-        std::cout << project[i] << "\n";
-    }
-
-    std::cout << "VERTICES \n\n";
-
-    for (auto it: vertices) {
-        std::cout << it << "\n";
-    }
-}
-
 void Model::draw() {
+    if (!show) {
+        return;
+    }
+
     shaders->use();
     shaders->setMat4("model", modelTransform);
     shaders->setMat4("view", viewTransform);
@@ -122,6 +110,10 @@ void Model::setCameraAndProjection(glm::mat4 camera, glm::mat4 projection) {
 }
 
 bool Model::checkCollisionWithMaze() {
+    if (!show) {
+        return false;
+    }
+
     auto x = currPoint.first;
     auto y = currPoint.second;
     auto w = objectWidth;
@@ -136,6 +128,44 @@ bool Model::checkCollisionWithMaze() {
         std::pair<float, float>
             vertex2 = {maze->vertices[index2 << 1],
                        maze->vertices[(index2 << 1) | 1]};
+
+        if (vertex1.first == vertex2.first) {
+            if (x + w >= vertex1.first
+                and vertex1.first >= x
+                and std::max(vertex1.second, vertex2.second) >= y
+                and std::min(vertex1.second, vertex2.second) <= y + w) {
+                return true;
+            }
+        } else {
+            if (y + w >= vertex1.second
+                and vertex1.second >= y
+                and std::max(vertex1.first, vertex2.first) >= x
+                and std::min(vertex1.first, vertex2.first) <= x + w) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int Model::getRandom(int low, int high) {
+    std::uniform_int_distribution<std::mt19937::result_type> randGen(low, high);
+    return randGen(rng);
+}
+
+bool Model::checkCollisionWithModel(Model *other) {
+    if (!show or !other->show) {
+        return false;
+    }
+
+    auto x = currPoint.first;
+    auto y = currPoint.second;
+    auto w = objectWidth;
+
+    for (int i = 0; i < other->points.size(); i++) {
+        auto vertex1 = other->points[i];
+        auto vertex2 = other->points[(i + 1) % (other->points.size())];
 
         if (vertex1.first == vertex2.first) {
             if (x + w >= vertex1.first

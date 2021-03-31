@@ -2,11 +2,14 @@
 
 Player::Player(const std::pair<float, float> &startPoint,
                Maze *maze,
-               GLFWwindow *window) : Model(startPoint, Color::YELLOW, maze) {
+               GLFWwindow *window,
+               Spawn *spawn) : Model(startPoint, Color::YELLOW, maze) {
     this->window = window;
     horizontalSpeed = 0;
     verticalSpeed = 0;
     moveSpeed = 0.04f;
+    this->spawn = spawn;
+    state = "alive";
 }
 
 /* Move player model */
@@ -30,7 +33,13 @@ void Player::move() {
     processInput();
 
     currPoint.first += verticalSpeed, currPoint.second += horizontalSpeed;
-    if (!checkCollisionWithMaze()) {
+    auto obstacleCollide = checkCollisionsWithSpawns();
+
+    if (obstacleCollide) {
+        state = "dead";
+    }
+
+    if (!checkCollisionWithMaze() and !obstacleCollide) {
         auto moveTransform = glm::translate(glm::mat4(1.0f),
                                             glm::vec3(horizontalSpeed,
                                                       verticalSpeed,
@@ -38,5 +47,30 @@ void Player::move() {
         modelTransform = moveTransform * modelTransform;
     } else {
         currPoint.first -= verticalSpeed, currPoint.second -= horizontalSpeed;
+    }
+}
+
+bool Player::checkCollisionsWithSpawns() {
+    /* Check collisions with spawn */
+    if (checkCollisionWithModel(spawn)) {
+        spawn->spawnPowerups(3);
+        spawn->spawnObstacles(20);
+    }
+
+    /* Check collisions with power ups */
+    for (auto &it: spawn->powerups) {
+        if (checkCollisionWithModel(it)) {
+            /* TODO: Add score */
+
+            /* Delete powerup */
+            it->show = false;
+        }
+    }
+
+    /* Check collisions with obstacles */
+    for (auto &it: spawn->obstacles) {
+        if (checkCollisionWithModel(it)) {
+            return true;
+        }
     }
 }

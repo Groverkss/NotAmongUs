@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <random>
 #include <vector>
 #include <utility>
 #include <iostream>
@@ -29,25 +30,30 @@ private:
     Shader *createShaders();
 protected:
     glm::mat4 modelTransform, viewTransform, projectionTransform;
-    float objectWidth;
     Maze *maze;
+
+    std::mt19937 rng;
+    int getRandom(int low, int high);
 public:
     /* Points in clockwise direction starting from top left */
     std::vector<std::pair<float, float>> points;
     std::vector<float> color;
     std::pair<float, float> currPoint;
+    float objectWidth;
+    bool show;
 
     Model(const std::pair<float, float> &startPoint,
           const std::vector<float> &color,
-          Maze *maze
-    );
+          Maze *maze,
+          float objectWidth = 0.2f);
 
-    void debug();
-    void draw();
+    virtual void draw();
 
-    void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
+    virtual void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
 
     bool checkCollisionWithMaze();
+
+    bool checkCollisionWithModel(Model *other);
 };
 
 #endif //NOTAMONGUS_SRC_MODEL_H_

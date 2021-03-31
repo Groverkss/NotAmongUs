@@ -1,5 +1,6 @@
 #include "WindowHandler.h"
 #include "Player.h"
+#include "Spawn.h"
 #include "Model.h"
 #include "Maze.h"
 #include "Color.h"
@@ -9,8 +10,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
 
 char *WINDOW_TITLE = "Not Among Us";
 int WIDTH = 600;
@@ -41,7 +40,8 @@ glm::mat4 createProjection(float zoom) {
 void updateWindow(WindowHandler *windowHandler,
                   Maze *maze,
                   Player *player,
-                  Model *imposter) {
+                  Model *imposter,
+                  Spawn *spawn) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -51,17 +51,26 @@ void updateWindow(WindowHandler *windowHandler,
 
     auto camera =
         createCamera(player->currPoint.second, player->currPoint.first);
-    auto projection = createProjection(8);
+    glm::mat4 projection;
+
+    /* TODO: Remove debugging zoom */
+    if (glfwGetKey(windowHandler->window, GLFW_KEY_1) == GLFW_PRESS) {
+        projection = createProjection(1);
+    } else {
+        projection = createProjection(8);
+    }
 
     /* Set view and projection */
     maze->setCameraAndProjection(camera, projection);
     player->setCameraAndProjection(camera, projection);
     imposter->setCameraAndProjection(camera, projection);
+    spawn->setCameraAndProjection(camera, projection);
 
     /* Draw the maze */
     maze->draw();
     player->draw();
     imposter->draw();
+    spawn->draw();
 
     /* Check and call events and swap buffers */
     glfwSwapBuffers(windowHandler->window);
@@ -73,12 +82,19 @@ int main() {
 
     auto maze = new Maze(gridBreadth, gridLength);
 
-    auto player = new Player(maze->startPoint, maze, windowHandler->window);
+    std::pair<float, float> spawnPoint = {maze->getRandom(0, gridBreadth - 1),
+                                          maze->getRandom(0, gridLength - 1)};
+
+    auto spawn = new Spawn(spawnPoint, maze);
+
+    auto player =
+        new Player(maze->startPoint, maze, windowHandler->window, spawn);
     auto imposter = new Model(maze->endPoint, Color::RED, maze);
 
     /* While window is not closed */
-    while (!glfwWindowShouldClose(windowHandler->window)) {
-        updateWindow(windowHandler, maze, player, imposter);
+    while (!glfwWindowShouldClose(windowHandler->window)
+        and player->state == "alive") {
+        updateWindow(windowHandler, maze, player, imposter, spawn);
     }
     exitWindow();
 }

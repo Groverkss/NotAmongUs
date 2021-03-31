@@ -3,12 +3,14 @@
 
 #include "Model.h"
 #include "Color.h"
+#include "Spawn.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <vector>
 #include <utility>
+#include <string>
 
 class Player : public Model {
 private:
@@ -18,11 +20,17 @@ private:
     GLFWwindow *window;
 
     float horizontalSpeed, verticalSpeed;
+
+    bool checkCollisionsWithSpawns();
+
+    Spawn *spawn;
 public:
     Player(const std::pair<float, float> &startPoint,
            Maze *maze,
-           GLFWwindow *window);
+           GLFWwindow *window,
+           Spawn *spawn);
 
+    std::string state;
     void move();
 };
 
