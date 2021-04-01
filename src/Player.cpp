@@ -14,7 +14,13 @@ Player::Player(const std::pair<float, float> &startPoint,
     verticalSpeed = 0;
     moveSpeed = 0.04f;
     this->spawn = spawn;
-    state = "alive";
+    state = 0;
+
+    endButton = new Model(maze->endPoint, Color::PURPLE, maze, 0.7f);
+
+    score = 0;
+    task1 = false;
+    task2 = false;
 }
 
 /* Move player model */
@@ -49,11 +55,13 @@ void Player::move() {
     }
 
     checkCollisionsWithSpawns();
+    checkButtonPress();
 }
 
 bool Player::checkCollisionsWithSpawns() {
     /* Check collisions with spawn */
     if (checkCollisionWithModel(spawn)) {
+        task2 = true;
         spawn->spawnPowerups(3);
         spawn->spawnObstacles(20);
     }
@@ -61,7 +69,7 @@ bool Player::checkCollisionsWithSpawns() {
     /* Check collisions with power ups */
     for (auto &it: spawn->powerups) {
         if (checkCollisionWithModel(it)) {
-            /* TODO: Add score */
+            score += spawn->powerupScore;
 
             /* Delete powerup */
             it->show = false;
@@ -71,10 +79,27 @@ bool Player::checkCollisionsWithSpawns() {
     /* Check collisions with obstacles */
     for (auto &it: spawn->obstacles) {
         if (checkCollisionWithModel(it)) {
-            /* TODO: Subtract score score */
+            score += spawn->obstacleScore;
 
             /* Delete obstacle */
             it->show = false;
         }
+    }
+}
+
+void Player::draw() {
+    Model::draw();
+    endButton->draw();
+}
+
+void Player::setCameraAndProjection(glm::mat4 camera, glm::mat4 projection) {
+    Model::setCameraAndProjection(camera, projection);
+    endButton->setCameraAndProjection(camera, projection);
+}
+
+void Player::checkButtonPress() {
+    if (checkCollisionWithModel(endButton) and task1 and task2) {
+        endButton->show = false;
+        state = 2;
     }
 }

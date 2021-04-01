@@ -94,13 +94,15 @@ int main() {
     auto spawn = new Spawn(spawnPoint, maze);
     auto player =
         new Player(maze->startPoint, maze, windowHandler->window, spawn);
-    auto imposter = new Imposter(imposterPoint, maze);
+    auto imposter = new Imposter(imposterPoint, maze, player);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)
-        and player->state == "alive") {
+        and player->state == 0) {
         updateWindow(windowHandler, maze, player, imposter, spawn
         );
     }
+
+    std::cout << player->state << std::endl;
     exitWindow();
 };

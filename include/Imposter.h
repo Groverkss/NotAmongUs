@@ -3,6 +3,7 @@
 
 #include "Color.h"
 #include "Model.h"
+#include "Player.h"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -16,10 +17,19 @@ class Imposter : public Model {
 private:
     std::pair<float, float> decideSpeed();
     float moveSpeed;
+    Player *player;
+    Model *killButton;
+    bool buttonPressed(Model *tempPlayer);
+    bool playerCollided(Model *tempPlayer);
 public:
-    Imposter(const std::pair<float, float> &startPoint, Maze *maze);
+    Imposter(const std::pair<float, float> &startPoint,
+             Maze *maze,
+             Player *player);
 
     void move();
+    void draw() override;
+    void setCameraAndProjection(glm::mat4 camera,
+                                glm::mat4 projection) override;
 };
 
 #endif //NOTAMONGUS_SRC_IMPOSTER_H_

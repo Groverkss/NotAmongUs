@@ -13,6 +13,7 @@ const std::vector<float> BLUE = {0.0f, 0.0f, 1.0f};
 const std::vector<float> CYAN = {0.0f, 1.0f, 1.0f};
 const std::vector<float> YELLOW = {1.0f, 1.0f, 0.0f};
 const std::vector<float> GREY = {0.375f, 0.375f, 0.375f};
+const std::vector<float> PURPLE = {0.5f, 0.0f, 0.5f};
 }
 
 #endif //NOTAMONGUS_INCLUDE_COLOR_H_

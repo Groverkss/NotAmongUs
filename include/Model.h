@@ -1,6 +1,7 @@
 #ifndef NOTAMONGUS_SRC_MODEL_H_
 #define NOTAMONGUS_SRC_MODEL_H_
 
+#include "Color.h"
 #include "Maze.h"
 #include "Shaders.h"
 
@@ -45,7 +46,8 @@ public:
     Model(const std::pair<float, float> &startPoint,
           const std::vector<float> &color,
           Maze *maze,
-          float objectWidth = 0.2f);
+          float objectWidth = 0.2f,
+          bool center = true);
 
     virtual void draw();
 

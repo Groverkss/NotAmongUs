@@ -16,8 +16,11 @@ public:
     std::vector<Model *> obstacles;
 
     void draw() override;
+
     void setCameraAndProjection(glm::mat4 camera,
                                 glm::mat4 projection) override;
+
+    int powerupScore, obstacleScore;
 };
 
 #endif //NOTAMONGUS_SRC_POWERUP_H_

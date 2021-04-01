@@ -3,7 +3,8 @@
 Model::Model(const std::pair<float, float> &startPoint,
              const std::vector<float> &color,
              Maze *mazeIn,
-             float objectWidth) {
+             float objectWidth,
+             bool center) {
     this->currPoint = startPoint;
     this->color = color;
     this->maze = mazeIn;
@@ -11,8 +12,10 @@ Model::Model(const std::pair<float, float> &startPoint,
 
     auto margin = (1.0f - objectWidth) / 2;
 
-    this->currPoint.first += margin;
-    this->currPoint.second += margin;
+    if (center) {
+        this->currPoint.first += margin;
+        this->currPoint.second += margin;
+    }
 
     points = {
         {currPoint.first, currPoint.second},
@@ -162,6 +165,10 @@ bool Model::checkCollisionWithModel(Model *other) {
     auto x = currPoint.first;
     auto y = currPoint.second;
     auto w = objectWidth;
+
+    if (other->objectWidth == 0.2f and color[0] == Color::YELLOW[0]
+        and color[1] == Color::YELLOW[1]) {
+    }
 
     for (int i = 0; i < other->points.size(); i++) {
         auto vertex1 = other->points[i];

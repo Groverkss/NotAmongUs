@@ -23,15 +23,28 @@ private:
 
     bool checkCollisionsWithSpawns();
 
+    Model *endButton;
+
     Spawn *spawn;
+
+    void checkButtonPress();
 public:
     Player(const std::pair<float, float> &startPoint,
            Maze *maze,
            GLFWwindow *window,
            Spawn *spawn);
 
-    std::string state;
     void move();
+
+    void draw() override;
+    void setCameraAndProjection(glm::mat4 camera,
+                                glm::mat4 projection) override;
+
+    int score;
+    bool task1, task2;
+
+    /* 0 --> Player, 1 --> Lost, 2 --> Won */
+    int state;
 };
 
 #endif //NOTAMONGUS_SRC_PLAYER_H_

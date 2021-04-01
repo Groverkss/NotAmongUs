@@ -2,6 +2,8 @@
 
 Spawn::Spawn(const std::pair<float, float> &startPoint, Maze *maze)
     : Model(startPoint, Color::GREEN, maze, 0.7f) {
+    powerupScore = 100;
+    obstacleScore = -20;
 };
 
 void Spawn::spawnPowerups(int count) {
