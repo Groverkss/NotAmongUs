@@ -1,5 +1,10 @@
 #include "Player.h"
 
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 Player::Player(const std::pair<float, float> &startPoint,
                Maze *maze,
                GLFWwindow *window,
@@ -33,13 +38,7 @@ void Player::move() {
     processInput();
 
     currPoint.first += verticalSpeed, currPoint.second += horizontalSpeed;
-    auto obstacleCollide = checkCollisionsWithSpawns();
-
-    if (obstacleCollide) {
-        state = "dead";
-    }
-
-    if (!checkCollisionWithMaze() and !obstacleCollide) {
+    if (!checkCollisionWithMaze()) {
         auto moveTransform = glm::translate(glm::mat4(1.0f),
                                             glm::vec3(horizontalSpeed,
                                                       verticalSpeed,
@@ -48,6 +47,8 @@ void Player::move() {
     } else {
         currPoint.first -= verticalSpeed, currPoint.second -= horizontalSpeed;
     }
+
+    checkCollisionsWithSpawns();
 }
 
 bool Player::checkCollisionsWithSpawns() {
@@ -70,7 +71,10 @@ bool Player::checkCollisionsWithSpawns() {
     /* Check collisions with obstacles */
     for (auto &it: spawn->obstacles) {
         if (checkCollisionWithModel(it)) {
-            return true;
+            /* TODO: Subtract score score */
+
+            /* Delete obstacle */
+            it->show = false;
         }
     }
 }

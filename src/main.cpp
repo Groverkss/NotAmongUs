@@ -1,5 +1,6 @@
 #include "WindowHandler.h"
 #include "Player.h"
+#include "Imposter.h"
 #include "Spawn.h"
 #include "Model.h"
 #include "Maze.h"
@@ -15,7 +16,7 @@ char *WINDOW_TITLE = "Not Among Us";
 int WIDTH = 600;
 int HEIGHT = 800;
 
-int gridBreadth = 30, gridLength = 30;
+int gridBreadth = 15, gridLength = 15;
 
 void exitWindow() {
     glfwTerminate();
@@ -40,7 +41,7 @@ glm::mat4 createProjection(float zoom) {
 void updateWindow(WindowHandler *windowHandler,
                   Maze *maze,
                   Player *player,
-                  Model *imposter,
+                  Imposter *imposter,
                   Spawn *spawn) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -48,6 +49,7 @@ void updateWindow(WindowHandler *windowHandler,
 
     /* Move objects */
     player->move();
+    imposter->move();
 
     auto camera =
         createCamera(player->currPoint.second, player->currPoint.first);
@@ -82,19 +84,23 @@ int main() {
 
     auto maze = new Maze(gridBreadth, gridLength);
 
-    std::pair<float, float> spawnPoint = {maze->getRandom(0, gridBreadth - 1),
-                                          maze->getRandom(0, gridLength - 1)};
+    std::pair<float, float> spawnPoint =
+        {maze->getRandom(0, gridBreadth - 1),
+         maze->getRandom(0, gridLength - 1)};
+    std::pair<float, float> imposterPoint =
+        {maze->getRandom(0, gridBreadth - 1),
+         maze->getRandom(0, gridLength - 1)};
 
     auto spawn = new Spawn(spawnPoint, maze);
-
     auto player =
         new Player(maze->startPoint, maze, windowHandler->window, spawn);
-    auto imposter = new Model(maze->endPoint, Color::RED, maze);
+    auto imposter = new Imposter(imposterPoint, maze);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)
         and player->state == "alive") {
-        updateWindow(windowHandler, maze, player, imposter, spawn);
+        updateWindow(windowHandler, maze, player, imposter, spawn
+        );
     }
     exitWindow();
-}
+};
