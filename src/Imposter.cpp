@@ -3,7 +3,7 @@
 Imposter::Imposter(const std::pair<float, float> &startPoint,
                    Maze *maze,
                    Player *player) : Model(startPoint, Color::RED, maze) {
-    moveSpeed = 0.04f;
+    moveSpeed = 0.02f;
     this->player = player;
 
     auto x = getRandom(0, maze->gridBreadth - 1);
@@ -11,6 +11,7 @@ Imposter::Imposter(const std::pair<float, float> &startPoint,
     killButton = new Model({x, y}, Color::WHITE, maze, 0.7f);
 
     fillDistances();
+    toMove = {0.0f, 0.0f};;
 }
 
 void Imposter::fillDistances() {
@@ -61,9 +62,10 @@ void Imposter::fillDistances() {
     }
 }
 
-std::pair<float, float> Imposter::decideSpeed() {
+std::pair<float, float> Imposter::decideSpeed(bool first, bool second) {
     std::pair<int, int> playerPos = player->currPoint;
-    std::pair<int, int> impostPos = currPoint;
+    std::pair<int, int> impostPos = {currPoint.first + first * objectWidth,
+                                     currPoint.second + second * objectWidth};
 
     auto xMax = maze->gridBreadth;
     auto yMax = maze->gridLength;
@@ -76,7 +78,16 @@ std::pair<float, float> Imposter::decideSpeed() {
     if (indexP != indexI) {
         movement = parent[indexI][indexP];
     } else {
-        movement = {0, 0};
+        float xDif = player->currPoint.first - currPoint.first;
+        float yDif = player->currPoint.second - currPoint.second;
+
+        movement = {xDif > 0 ? 1 : -1, yDif > 0 ? 1 : -1};
+        if (xDif == 0) {
+            movement.first = 0;
+        }
+        if (yDif == 0) {
+            movement.second = 0;
+        }
     }
 
     return {movement.first * moveSpeed, movement.second * moveSpeed};
@@ -101,20 +112,25 @@ void Imposter::move() {
         return;
     }
 
-    auto movingSpeed = decideSpeed();
-
-    currPoint.first += movingSpeed.first;
-    currPoint.second += movingSpeed.second;
-    if (!checkCollisionWithMaze()) {
-        auto moveTransform = glm::translate(glm::mat4(1.0f),
-                                            glm::vec3(movingSpeed.second,
-                                                      movingSpeed.first,
-                                                      0.0f));
-        modelTransform = moveTransform * modelTransform;
-    } else {
+    /* Try to move based on any of the corners. Atleast one of them will work */
+    std::pair<float, float> movingSpeed = {0.0f, 0.0f};
+    for (int i = 0; i < 4; i++) {
+        movingSpeed = decideSpeed(1 & i, 2 & i);
+        currPoint.first += movingSpeed.first;
+        currPoint.second += movingSpeed.second;
+        if (!checkCollisionWithMaze()) {
+            break;
+        }
         currPoint.first -= movingSpeed.first;
         currPoint.second -= movingSpeed.second;
+        movingSpeed = {0.0f, 0.0f};
     }
+
+    auto moveTransform = glm::translate(glm::mat4(1.0f),
+                                        glm::vec3(movingSpeed.second,
+                                                  movingSpeed.first,
+                                                  0.0f));
+    modelTransform = moveTransform * modelTransform;
 
     if (playerCollided(tempPlayer)) {
         player->state = 1;

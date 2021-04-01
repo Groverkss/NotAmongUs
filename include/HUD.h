@@ -19,8 +19,12 @@ private:
 public:
     HUD(Player *player, GLFWwindow *window);
 
-    void draw(std::string hudText = "", int scale = 1,
-              GLfloat width = 0, GLfloat height = 0);
+    void draw(std::string hudText = "",
+              int scale = 1,
+              GLfloat width = 0,
+              GLfloat height = 0,
+              int horizontal = GLT_LEFT,
+              int vertical = GLT_TOP);
 
     void endgame();
 };

@@ -12,12 +12,14 @@
 
 #include <vector>
 #include <utility>
+#include <cmath>
 
 class Imposter : public Model {
 private:
     const int INF = 1e9;
 
-    std::pair<float, float> decideSpeed();
+    std::pair<float, float> decideSpeed(bool first = false,
+                                        bool second = false);
     float moveSpeed;
     Player *player;
     Model *killButton;
@@ -27,6 +29,7 @@ private:
     std::vector<std::vector<int>> distance;
     std::vector<std::vector<std::pair<int, int>>> parent;
     void fillDistances();
+    std::pair<float, float> toMove;
 public:
     Imposter(const std::pair<float, float> &startPoint,
              Maze *maze,

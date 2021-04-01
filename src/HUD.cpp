@@ -5,7 +5,12 @@ HUD::HUD(Player *player, GLFWwindow *window) {
     this->window = window;
 }
 
-void HUD::draw(std::string hudText, int scale, GLfloat width, GLfloat height) {
+void HUD::draw(std::string hudText,
+               int scale,
+               GLfloat width,
+               GLfloat height,
+               int horizontal,
+               int vertical) {
     /* Initialize glText */
     gltInit();
 
@@ -28,7 +33,7 @@ void HUD::draw(std::string hudText, int scale, GLfloat width, GLfloat height) {
 
     /* Draw any amount of text between begin and end */
     gltColor(1.0f, 1.0f, 1.0f, 1.0f);
-    gltDrawText2DAligned(text, height, width, scale, GLT_CENTER, GLT_CENTER);
+    gltDrawText2DAligned(text, height, width, scale, horizontal, vertical);
 
     /* Finish drawing text */
     gltEndDraw();
@@ -48,11 +53,15 @@ void HUD::endgame() {
         draw("You Lost!",
              5,
              (GLfloat) viewportWidth / 2,
-             (GLfloat) viewportHeight / 2);
+             (GLfloat) viewportHeight / 2,
+             GLT_CENTER,
+             GLT_CENTER);
     } else {
         draw("You Won!",
              5,
              (GLfloat) viewportWidth / 2,
-             (GLfloat) viewportHeight / 2);
+             (GLfloat) viewportHeight / 2,
+             GLT_CENTER,
+             GLT_CENTER);
     }
 }
