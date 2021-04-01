@@ -1,3 +1,4 @@
+#include "HUD.h"
 #include "WindowHandler.h"
 #include "Player.h"
 #include "Imposter.h"
@@ -18,7 +19,16 @@ int HEIGHT = 800;
 
 int gridBreadth = 15, gridLength = 15;
 
-void exitWindow() {
+void exitWindow(WindowHandler *windowHandler, HUD *hud) {
+    while (!glfwWindowShouldClose(windowHandler->window)) {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        hud->endgame();
+
+        glfwSwapBuffers(windowHandler->window);
+        glfwPollEvents();
+    }
     glfwTerminate();
 }
 
@@ -42,7 +52,8 @@ void updateWindow(WindowHandler *windowHandler,
                   Maze *maze,
                   Player *player,
                   Imposter *imposter,
-                  Spawn *spawn) {
+                  Spawn *spawn,
+                  HUD *hud) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -73,6 +84,7 @@ void updateWindow(WindowHandler *windowHandler,
     player->draw();
     imposter->draw();
     spawn->draw();
+    hud->draw();
 
     /* Check and call events and swap buffers */
     glfwSwapBuffers(windowHandler->window);
@@ -95,14 +107,13 @@ int main() {
     auto player =
         new Player(maze->startPoint, maze, windowHandler->window, spawn);
     auto imposter = new Imposter(imposterPoint, maze, player);
+    auto hud = new HUD(player, windowHandler->window);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)
         and player->state == 0) {
-        updateWindow(windowHandler, maze, player, imposter, spawn
-        );
+        updateWindow(windowHandler, maze, player, imposter, spawn, hud);
     }
 
-    std::cout << player->state << std::endl;
-    exitWindow();
+    exitWindow(windowHandler, hud);
 };

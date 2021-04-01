@@ -34,7 +34,6 @@ private:
         std::pair<int, int> points[2];
     };
 
-    std::vector<std::vector<Cell *>> grid;
     std::mt19937 rng;
 
     unsigned int VAO;
@@ -50,6 +49,7 @@ private:
 protected:
     glm::mat4 viewTransform, projectionTransform;
 public:
+    std::vector<std::vector<Cell *>> grid;
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
 

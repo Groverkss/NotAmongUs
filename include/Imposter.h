@@ -15,12 +15,18 @@
 
 class Imposter : public Model {
 private:
+    const int INF = 1e9;
+
     std::pair<float, float> decideSpeed();
     float moveSpeed;
     Player *player;
     Model *killButton;
     bool buttonPressed(Model *tempPlayer);
     bool playerCollided(Model *tempPlayer);
+
+    std::vector<std::vector<int>> distance;
+    std::vector<std::vector<std::pair<int, int>>> parent;
+    void fillDistances();
 public:
     Imposter(const std::pair<float, float> &startPoint,
              Maze *maze,

@@ -9,12 +9,77 @@ Imposter::Imposter(const std::pair<float, float> &startPoint,
     auto x = getRandom(0, maze->gridBreadth - 1);
     auto y = getRandom(0, maze->gridLength - 1);
     killButton = new Model({x, y}, Color::WHITE, maze, 0.7f);
+
+    fillDistances();
+}
+
+void Imposter::fillDistances() {
+    auto xMax = maze->gridBreadth;
+    auto yMax = maze->gridLength;
+
+    distance.resize(xMax * yMax, std::vector<int>(xMax * yMax, INF));
+    parent.resize(xMax * yMax, std::vector<std::pair<int, int>>(xMax * yMax));
+
+    for (int i = 0; i < xMax; i++) {
+        for (int j = 0; j < yMax; j++) {
+            auto index = i * yMax + j;
+            distance[index][index] = 0;
+            for (int k = 0; k < 4; k++) {
+                auto cell = maze->grid[i][j];
+                if (cell->wall[k]) {
+                    continue;
+                }
+
+                int newIdx;
+                switch (k) {
+                    case 0:newIdx = i * yMax + (j - 1);
+                        break;
+                    case 1:newIdx = i * yMax + (j + 1);
+                        break;
+                    case 2:newIdx = (i - 1) * yMax + j;
+                        break;
+                    case 3:newIdx = (i + 1) * yMax + j;
+                        break;
+                }
+                distance[index][newIdx] = 1;
+                parent[index][newIdx] =
+                    {(newIdx / yMax) - i, (newIdx % yMax) - j};
+            }
+        }
+    }
+
+    /* Floyd Washell */
+    for (int k = 0; k < xMax * yMax; k++) {
+        for (int i = 0; i < xMax * yMax; i++) {
+            for (int j = 0; j < xMax * yMax; j++) {
+                if (distance[i][j] > distance[i][k] + distance[k][j]) {
+                    distance[i][j] = distance[i][k] + distance[k][j];
+                    parent[i][j] = parent[i][k];
+                }
+            }
+        }
+    }
 }
 
 std::pair<float, float> Imposter::decideSpeed() {
-    /* TODO: Add path finding */
-    return {getRandom(-1, 1) * moveSpeed,
-            getRandom(-1, 1) * moveSpeed};
+    std::pair<int, int> playerPos = player->currPoint;
+    std::pair<int, int> impostPos = currPoint;
+
+    auto xMax = maze->gridBreadth;
+    auto yMax = maze->gridLength;
+
+    auto indexP = playerPos.first * yMax + playerPos.second;
+    auto indexI = impostPos.first * yMax + impostPos.second;
+
+    std::pair<int, int> movement;
+
+    if (indexP != indexI) {
+        movement = parent[indexI][indexP];
+    } else {
+        movement = {0, 0};
+    }
+
+    return {movement.first * moveSpeed, movement.second * moveSpeed};
 }
 
 void Imposter::move() {
