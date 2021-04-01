@@ -56,6 +56,9 @@ public:
     int gridBreadth, gridLength;
     std::pair<int, int> startPoint, endPoint;
 
+    std::map<std::pair<int, int>, int> hashVertex;
+    std::map<int, std::pair<int, int>> invHashVertex;
+
     Maze(int breadth, int length);
 
     void debug();

@@ -63,7 +63,7 @@ bool Player::checkCollisionsWithSpawns() {
     if (checkCollisionWithModel(spawn)) {
         task2 = true;
         spawn->spawnPowerups(3);
-        spawn->spawnObstacles(20);
+        spawn->spawnObstacles(3);
     }
 
     /* Check collisions with power ups */

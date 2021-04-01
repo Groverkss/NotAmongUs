@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "Maze.h"
 #include "Color.h"
+#include "RayTracing.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -17,7 +18,7 @@ char *WINDOW_TITLE = "Not Among Us";
 int WIDTH = 600;
 int HEIGHT = 800;
 
-int gridBreadth = 15, gridLength = 15;
+int gridBreadth = 8, gridLength = 8;
 
 void exitWindow(WindowHandler *windowHandler, HUD *hud) {
     while (!glfwWindowShouldClose(windowHandler->window)) {
@@ -53,14 +54,16 @@ void updateWindow(WindowHandler *windowHandler,
                   Player *player,
                   Imposter *imposter,
                   Spawn *spawn,
-                  HUD *hud) {
+                  HUD *hud,
+                  RayTracing *stencil) {
     /* Set window background to Black */
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glEnable(GL_STENCIL_TEST);
 
     /* Move objects */
     player->move();
-    imposter->move();
+//    imposter->move();
 
     auto camera =
         createCamera(player->currPoint.second, player->currPoint.first);
@@ -78,8 +81,10 @@ void updateWindow(WindowHandler *windowHandler,
     player->setCameraAndProjection(camera, projection);
     imposter->setCameraAndProjection(camera, projection);
     spawn->setCameraAndProjection(camera, projection);
+    stencil->setCameraAndProjection(camera, projection);
 
     /* Draw the maze */
+    stencil->drawStencil(player->currPoint.first, player->currPoint.second);
     maze->draw();
     player->draw();
     imposter->draw();
@@ -108,11 +113,18 @@ int main() {
         new Player(maze->startPoint, maze, windowHandler->window, spawn);
     auto imposter = new Imposter(imposterPoint, maze, player);
     auto hud = new HUD(player, windowHandler->window);
+    auto stencil = new RayTracing(maze);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)
         and player->state == 0) {
-        updateWindow(windowHandler, maze, player, imposter, spawn, hud);
+        updateWindow(windowHandler,
+                     maze,
+                     player,
+                     imposter,
+                     spawn,
+                     hud,
+                     stencil);
     }
 
     exitWindow(windowHandler, hud);

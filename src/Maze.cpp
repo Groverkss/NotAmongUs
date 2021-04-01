@@ -28,7 +28,6 @@ Maze::Maze(int breadth, int length) {
     createIndices();
     VAO = createVAO();
     shaders = createShaders();
-
 }
 
 int Maze::getRandom(int low, int high) {
@@ -147,7 +146,6 @@ void Maze::createIndices() {
         };
 
     /* Get all unique vertices */
-    std::map<std::pair<int, int>, int> hashVertex;
     for (auto row: grid) {
         for (auto col: row) {
             std::pair<int, int> curr = {col->row, col->col};
@@ -168,13 +166,15 @@ void Maze::createIndices() {
 
     /* Everything here should be in the model matrix */
     for (auto &it: hashVertex) {
-        auto vertex1 = (float) it.first.first;
-        auto vertex2 = (float) it.first.second;
+        auto vertexX = (float) it.first.first;
+        auto vertexY = (float) it.first.second;
 
-        vertices.push_back(vertex1);
-        vertices.push_back(vertex2);
+        vertices.push_back(vertexX);
+        vertices.push_back(vertexY);
 
         it.second = currIdx++;
+
+        invHashVertex[it.second] = it.first;
     }
 
     /* Store line indices */

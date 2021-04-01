@@ -7,7 +7,7 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-add_executable(NotAmongUs src/main.cpp src/WindowHandler.cpp src/Maze.cpp src/Model.cpp src/Player.cpp src/Spawn.cpp src/Imposter.cpp src/HUD.cpp)
+add_executable(NotAmongUs src/main.cpp src/WindowHandler.cpp src/Maze.cpp src/Model.cpp src/Player.cpp src/Spawn.cpp src/Imposter.cpp src/HUD.cpp src/RayTracing.cpp include/RayTracing.h)
 
 # Shader loader class
 target_include_directories(${PROJECT_NAME} PRIVATE "${INCLUDE_DIR}")
