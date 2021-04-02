@@ -71,7 +71,7 @@ void updateWindow(WindowHandler *windowHandler,
 
     /* TODO: Remove debugging zoom */
     if (glfwGetKey(windowHandler->window, GLFW_KEY_1) == GLFW_PRESS) {
-        projection = createProjection(8);
+        projection = createProjection(4);
     } else {
         projection = createProjection(1);
     }

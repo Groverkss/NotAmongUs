@@ -32,6 +32,7 @@ private:
     Shader *createShaders();
     Shader *shaders;
     glm::mat4 viewTransform, projectionTransform;
+    float offset;
 public:
     RayTracing(Maze *maze);
     void drawStencil(float sightY, float sightX);

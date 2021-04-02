@@ -3,6 +3,7 @@
 RayTracing::RayTracing(Maze *maze) {
     this->maze = maze;
     shaders = createShaders();
+    offset = 0.1f;
 }
 
 glm::dvec3 RayTracing::getIntersection(glm::dvec2 rayA,
@@ -47,8 +48,8 @@ glm::dvec3 RayTracing::getIntersection(glm::dvec2 rayA,
         return glm::dvec3(0.0f, 0.0f, -1.0f);
     }
 
-    return glm::dvec3(r_px + r_dx * (T1),
-                      r_py + r_dy * (T1),
+    return glm::dvec3(r_px + r_dx * (T1 + offset),
+                      r_py + r_dy * (T1 + offset),
                       T1);
 }
 
@@ -121,10 +122,10 @@ void RayTracing::drawStencil(float sightY, float sightX) {
     shaders->setMat4("projection", projectionTransform);
 
     /* Enable stencil writing */
-//    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-//    glStencilFunc(GL_ALWAYS, 0, 1);
-//    glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
-//    glStencilMask(1);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    glStencilFunc(GL_ALWAYS, 0, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
+    glStencilMask(1);
 
     /* Build sight polygon */
     auto intersections = buildSightPolygon(sightY, sightX);
@@ -168,9 +169,9 @@ void RayTracing::drawStencil(float sightY, float sightX) {
     glBindVertexArray(0);
 
     /* Disable stencil */
-//    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-//    glStencilFunc(GL_EQUAL, 1, 1);
-//    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glStencilFunc(GL_EQUAL, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 }
 
 Shader *RayTracing::createShaders() {
