@@ -23,7 +23,7 @@ int gridBreadth = 8, gridLength = 8;
 void exitWindow(WindowHandler *windowHandler, HUD *hud) {
     while (!glfwWindowShouldClose(windowHandler->window)) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         hud->endgame();
 
@@ -89,6 +89,9 @@ void updateWindow(WindowHandler *windowHandler,
     imposter->draw();
     spawn->draw();
     maze->draw();
+
+    glDisable(GL_STENCIL_TEST);
+
     hud->draw();
 
     /* Check and call events and swap buffers */
