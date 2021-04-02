@@ -23,7 +23,7 @@ int gridBreadth = 8, gridLength = 8;
 void exitWindow(WindowHandler *windowHandler, HUD *hud) {
     while (!glfwWindowShouldClose(windowHandler->window)) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         hud->endgame();
 
@@ -63,21 +63,20 @@ void updateWindow(WindowHandler *windowHandler,
 
     /* Move objects */
     player->move();
-//    imposter->move();
+    imposter->move();
 
     auto camera =
         createCamera(player->currPoint.second, player->currPoint.first);
     glm::mat4 projection;
 
-    /* TODO: Remove debugging zoom */
-    if (glfwGetKey(windowHandler->window, GLFW_KEY_1) == GLFW_PRESS) {
-        projection = createProjection(4);
-    } else {
-        projection = createProjection(1);
-    }
+    projection = createProjection(2);
 
     /* Set view and projection */
-    maze->setCameraAndProjection(camera, projection);
+    maze->setCameraAndProjection(camera,
+                                 projection,
+                                 glm::vec3(player->currPoint.second,
+                                           player->currPoint.first,
+                                           0.0f));
     player->setCameraAndProjection(camera, projection);
     imposter->setCameraAndProjection(camera, projection);
     spawn->setCameraAndProjection(camera, projection);
@@ -115,6 +114,9 @@ int main() {
     auto imposter = new Imposter(imposterPoint, maze, player);
     auto hud = new HUD(player, windowHandler->window);
     auto stencil = new RayTracing(maze);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     /* While window is not closed */
     while (!glfwWindowShouldClose(windowHandler->window)

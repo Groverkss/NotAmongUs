@@ -237,15 +237,19 @@ Shader *Maze::createShaders() {
     return newShader;
 }
 
-void Maze::setCameraAndProjection(glm::mat4 camera, glm::mat4 projection) {
+void Maze::setCameraAndProjection(glm::mat4 camera,
+                                  glm::mat4 projection,
+                                  glm::vec3 lightPosition) {
     viewTransform = camera;
     projectionTransform = projection;
+    this->lightPosition = lightPosition;
 }
 
 void Maze::draw() {
     shaders->use();
     shaders->setMat4("view", viewTransform);
     shaders->setMat4("projection", projectionTransform);
+    shaders->setVec3("lightpos", lightPosition);
     glBindVertexArray(VAO);
     glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

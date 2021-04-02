@@ -46,6 +46,8 @@ private:
     void createIndices();
     unsigned int createVAO();
     Shader *createShaders();
+
+    glm::vec3 lightPosition;
 protected:
     glm::mat4 viewTransform, projectionTransform;
 public:
@@ -64,7 +66,9 @@ public:
     void debug();
     void draw();
 
-    void setCameraAndProjection(glm::mat4 camera, glm::mat4 projection);
+    void setCameraAndProjection(glm::mat4 camera,
+                                glm::mat4 projection,
+                                glm::vec3 lightPosition);
     int getRandom(int low, int high);
 };
 
