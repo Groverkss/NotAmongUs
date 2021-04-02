@@ -16,12 +16,14 @@ void HUD::draw(std::string hudText,
 
     std::string score = std::to_string(player->score);
     std::string tasks = std::to_string(player->task1 + player->task2);
+    std::string time = std::to_string(player->time);
+    std::string light = player->light ? "On" : "Off";
 
     if (hudText.empty()) {
         hudText = "Health " + score + "\n" +
             "Tasks Completed / Tasks Available: " + tasks + " / 2\n" +
-            "Light: On\n" +
-            "Time: 0";
+            "Light: " + light + "\n" +
+            "Time: " + time + "\n";
     }
 
     /* Creating text */

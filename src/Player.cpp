@@ -21,6 +21,7 @@ Player::Player(const std::pair<float, float> &startPoint,
     score = 0;
     task1 = false;
     task2 = false;
+    light = true;
 }
 
 /* Move player model */

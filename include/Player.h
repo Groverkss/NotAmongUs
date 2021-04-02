@@ -42,6 +42,8 @@ public:
 
     int score;
     bool task1, task2;
+    double time;
+    bool light;
 
     /* 0 --> Player, 1 --> Lost, 2 --> Won */
     int state;

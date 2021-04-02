@@ -19,6 +19,7 @@ int WIDTH = 600;
 int HEIGHT = 800;
 
 int gridBreadth = 8, gridLength = 8;
+int gameTime = 300;
 
 void exitWindow(WindowHandler *windowHandler, HUD *hud) {
     while (!glfwWindowShouldClose(windowHandler->window)) {
@@ -118,6 +119,8 @@ int main() {
     auto hud = new HUD(player, windowHandler->window);
     auto stencil = new RayTracing(maze);
 
+    player->time = gameTime;
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -131,6 +134,11 @@ int main() {
                      spawn,
                      hud,
                      stencil);
+
+        player->time -= 0.001f;
+        if (player->time < 0.0f) {
+            player->state = 1;
+        }
     }
 
     exitWindow(windowHandler, hud);

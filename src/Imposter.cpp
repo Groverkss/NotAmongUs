@@ -3,7 +3,7 @@
 Imposter::Imposter(const std::pair<float, float> &startPoint,
                    Maze *maze,
                    Player *player) : Model(startPoint, Color::RED, maze) {
-    moveSpeed = 0.02f;
+    moveSpeed = 0.03f;
     this->player = player;
 
     auto x = getRandom(0, maze->gridBreadth - 1);
