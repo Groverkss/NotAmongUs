@@ -5,28 +5,28 @@ RayTracing::RayTracing(Maze *maze) {
     shaders = createShaders();
 }
 
-glm::vec3 RayTracing::getIntersection(glm::vec2 rayA,
-                                      glm::vec2 rayB,
-                                      glm::vec2 segA,
-                                      glm::vec2 segB) {
+glm::dvec3 RayTracing::getIntersection(glm::dvec2 rayA,
+                                       glm::dvec2 rayB,
+                                       glm::dvec2 segA,
+                                       glm::dvec2 segB) {
     /* RAY in paramteric: Point + Delta*T1 */
-    float r_px = rayA.x;
-    float r_py = rayA.y;
-    float r_dx = rayB.x - rayA.x;
-    float r_dy = rayB.y - rayA.y;
+    double r_px = rayA.x;
+    double r_py = rayA.y;
+    double r_dx = rayB.x - rayA.x;
+    double r_dy = rayB.y - rayA.y;
 
     /* SEGMENT in paramteric: Point + Delta*T2 */
-    float s_px = segA.x;
-    float s_py = segA.y;
-    float s_dx = segB.x;
-    float s_dy = segB.y;
+    double s_px = segA.x;
+    double s_py = segA.y;
+    double s_dx = segB.x - segA.x;
+    double s_dy = segB.y - segA.y;
 
     /* Check if paralllel */
-    float r_mag = sqrt(r_dx * r_dx + r_dy * r_dy);
-    float s_mag = sqrt(s_dx * s_dx + s_dy * s_dy);
+    double r_mag = sqrt(r_dx * r_dx + r_dy * r_dy);
+    double s_mag = sqrt(s_dx * s_dx + s_dy * s_dy);
     if (r_dx / r_mag == s_dx / s_mag and r_dy / r_mag == s_dy / s_mag) {
         /* Unit Vectors are same */
-        return glm::vec3(0.0f, 0.0f, -1.0f);
+        return glm::dvec3(0.0f, 0.0f, -1.0f);
     }
 
     /* SOLVE FOR T1 & T2 */
@@ -35,71 +35,70 @@ glm::vec3 RayTracing::getIntersection(glm::vec2 rayA,
     /* ==> s_px*r_dy + s_dx*T2*r_dy - r_px*r_dy = s_py*r_dx + s_dy*T2*r_dx - r_py*r_dx */
     /* ==> T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx) */
 
-    float T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px))
+    double T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px))
         / (s_dx * r_dy - s_dy * r_dx);
-    float T1 = (s_px + s_dx * T2 - r_px) / r_dx;
+    double T1 = (s_px + s_dx * T2 - r_px) / r_dx;
 
     // Must be within parametic whatevers for RAY/SEGMENT
     if (T1 < 0) {
-        return glm::vec3(0.0f, 0.0f, -1.0f);
+        return glm::dvec3(0.0f, 0.0f, -1.0f);
     }
-    if (T2 < 0 || T2 > 1) {
-        return glm::vec3(0.0f, 0.0f, -1.0f);
+    if (T2 < 0.0 || T2 > 1.0f) {
+        return glm::dvec3(0.0f, 0.0f, -1.0f);
     }
 
-    return glm::vec3(r_px + r_dx * T1, r_py + r_dy * T1, T1);
+    return glm::dvec3(r_px + r_dx * (T1),
+                      r_py + r_dy * (T1),
+                      T1);
 }
 
-std::vector<glm::vec3> RayTracing::buildSightPolygon(float sightY,
-                                                     float sightX) {
+std::vector<glm::dvec3> RayTracing::buildSightPolygon(double sightY,
+                                                      double sightX) {
     /* Get all angles */
-    std::vector<float> uniqueAngles;
-    std::vector<float> vertexAngle;
+    std::vector<double> uniqueAngles;
     for (auto point: maze->invHashVertex) {
-        float x = point.second.second;
-        float y = point.second.first;
+        double x = point.second.second;
+        double y = point.second.first;
 
         auto angle = glm::atan(y - sightY, x - sightX);
-        vertexAngle.push_back(angle);
 
-//        uniqueAngles.push_back(angle - 0.00001f);
+        uniqueAngles.push_back(angle - 0.00001f);
         uniqueAngles.push_back(angle);
-//        uniqueAngles.push_back(angle + 0.00001f);
+        uniqueAngles.push_back(angle + 0.00001f);
     }
 
     /* Fire rays in all directions */
-    std::vector<glm::vec3> intersects;
+    std::vector<glm::dvec3> intersects;
     for (auto angle: uniqueAngles) {
         /* Calculate dx & dy from angle */
-        float dx = cosf(angle);
-        float dy = sinf(angle);
+        double dx = cos(angle);
+        double dy = sin(angle);
 
         /* Start ray */
-        glm::vec2 rayA = glm::vec2(sightX, sightY);
-        glm::vec2 rayB = glm::vec2(sightX + dx, sightY + dy);
+        auto rayA = glm::dvec2(sightX, sightY);
+        auto rayB = glm::dvec2(sightX + dx, sightY + dy);
 
         /* Get closest intersection */
-        glm::vec3 closestIntersect = glm::vec3(0.0f, 0.0f, -1.0f);
+        auto closestIntersect = glm::dvec3(0.0f, 0.0f, -1.0f);
         for (int i = 0; i < maze->indices.size(); i += 2) {
-            auto vertex1 = maze->invHashVertex[maze->indices[(i << 1)]];
-            auto vertex2 = maze->invHashVertex[maze->indices[(i << 1) | 1]];
+            auto vertex1 = maze->invHashVertex[maze->indices[i]];
+            auto vertex2 = maze->invHashVertex[maze->indices[i | 1]];
 
-            glm::vec2 segA = glm::vec2(vertex1.second, vertex1.first);
-            glm::vec2 segB = glm::vec2(vertex2.second, vertex2.first);
+            auto segA = glm::dvec2(vertex1.second, vertex1.first);
+            auto segB = glm::dvec2(vertex2.second, vertex2.first);
 
             auto intersect = getIntersection(rayA, rayB, segA, segB);
-            if (intersect.z == -1.0f) {
+            if (intersect.z < 0.0f) {
                 continue;
             }
 
-            if (closestIntersect.z == -1.0f
-                or intersect.z < closestIntersect.z) {
+            if (closestIntersect.z < 0.0f or intersect.z < closestIntersect.z) {
                 closestIntersect = intersect;
             }
         }
 
         /* Intersection angle */
-        if (closestIntersect.z == -1.0f) {
+        if (closestIntersect.z < 0.0f) {
             continue;
         }
         closestIntersect.z = angle;
@@ -110,7 +109,7 @@ std::vector<glm::vec3> RayTracing::buildSightPolygon(float sightY,
 
     std::sort(intersects.begin(),
               intersects.end(),
-              [](const glm::vec3 &a, const glm::vec3 &b) -> bool {
+              [](const glm::dvec3 &a, const glm::dvec3 &b) -> bool {
                   return a.z < b.z;
               });
     return intersects;
@@ -122,21 +121,25 @@ void RayTracing::drawStencil(float sightY, float sightX) {
     shaders->setMat4("projection", projectionTransform);
 
     /* Enable stencil writing */
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-    glStencilFunc(GL_ALWAYS, 0, 1);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
-    glStencilMask(1);
+//    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+//    glStencilFunc(GL_ALWAYS, 0, 1);
+//    glStencilOp(GL_KEEP, GL_KEEP, GL_INVERT);
+//    glStencilMask(1);
 
     /* Build sight polygon */
     auto intersections = buildSightPolygon(sightY, sightX);
 
     std::vector<float> vertices;
-    vertices.push_back(sightX);
-    vertices.push_back(sightY);
 
-    for (auto it: intersections) {
-        vertices.push_back(it.x);
-        vertices.push_back(it.y);
+    for (int i = 0; i < intersections.size(); i++) {
+        auto curr1 = intersections[(i + 1) % (intersections.size())];
+        auto curr2 = intersections[i % intersections.size()];
+        vertices.push_back(sightX);
+        vertices.push_back(sightY);
+        vertices.push_back(curr1.x);
+        vertices.push_back(curr1.y);
+        vertices.push_back(curr2.x);
+        vertices.push_back(curr2.y);
     }
 
     /* Create triangle fan from sight polygon */
@@ -160,14 +163,14 @@ void RayTracing::drawStencil(float sightY, float sightX) {
                           nullptr);
     glEnableVertexAttribArray(0);
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size());
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 
     glBindVertexArray(0);
 
     /* Disable stencil */
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glStencilFunc(GL_EQUAL, 1, 1);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+//    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+//    glStencilFunc(GL_EQUAL, 1, 1);
+//    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 }
 
 Shader *RayTracing::createShaders() {

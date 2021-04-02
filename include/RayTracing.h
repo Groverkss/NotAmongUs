@@ -15,10 +15,10 @@
 
 class RayTracing {
 private:
-    glm::vec3 getIntersection(glm::vec2 rayA,
-                              glm::vec2 rayB,
-                              glm::vec2 segA,
-                              glm::vec2 segB);
+    glm::dvec3 getIntersection(glm::dvec2 rayA,
+                               glm::dvec2 rayB,
+                               glm::dvec2 segA,
+                               glm::dvec2 segB);
 
     char *vertexShader = "resources/shaders/stencilVertex.glsl";
     char *fragmentShader = "resources/shaders/stencilFragment.glsl";
@@ -27,7 +27,7 @@ private:
      * Returns vector intersect x point, intersect y point,
      * intersect angle (sorted on angle)
      * */
-    std::vector<glm::vec3> buildSightPolygon(float sightX, float sightY);
+    std::vector<glm::dvec3> buildSightPolygon(double sightX, double sightY);
     Maze *maze;
     Shader *createShaders();
     Shader *shaders;

@@ -71,9 +71,9 @@ void updateWindow(WindowHandler *windowHandler,
 
     /* TODO: Remove debugging zoom */
     if (glfwGetKey(windowHandler->window, GLFW_KEY_1) == GLFW_PRESS) {
-        projection = createProjection(1);
-    } else {
         projection = createProjection(8);
+    } else {
+        projection = createProjection(1);
     }
 
     /* Set view and projection */
@@ -84,11 +84,12 @@ void updateWindow(WindowHandler *windowHandler,
     stencil->setCameraAndProjection(camera, projection);
 
     /* Draw the maze */
-    stencil->drawStencil(player->currPoint.first, player->currPoint.second);
-    maze->draw();
+    stencil->drawStencil(player->currPoint.first + player->objectWidth / 2,
+                         player->currPoint.second + player->objectWidth / 2);
     player->draw();
     imposter->draw();
     spawn->draw();
+    maze->draw();
     hud->draw();
 
     /* Check and call events and swap buffers */
